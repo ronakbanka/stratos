@@ -11,65 +11,146 @@
     .module('cf-metrics')
     .run(registerMetricsModel);
 
-  function registerMetricsModel($q, modelManager, apiManager) {
-    modelManager.register('cf-metrics.metrics', new MetricsModel($q, apiManager));
+  function registerMetricsModel($q, modelManager, apiManager, modelUtils) {
+    modelManager.register('cf-metrics.metrics', new MetricsModel($q, apiManager, modelUtils));
   }
 
-  function MetricsModel($q, apiManager) {
+  function MetricsModel($q, apiManager, modelUtils) {
 
-    // Exports
+    // App Exports
     this.getAppCpuUsage = getAppCpuUsage;
     this.getAppMemoryUsage = getAppMemoryUsage;
     this.getAppDiskUsage = getAppDiskUsage;
+    
+    // Cluster Exports
+    this.getCCTasksRunningMemory = getCCTasksRunningMemory;
+    this.getCCTasksRunningCount = getCCTasksRunningCount;
+    this.getCCCpuLoad = getCCCpuLoad;
+    this.getCCMemoryLoad = getCCMemoryLoad;
+
+    this.getAuctioneerMemAllocated = getAuctioneerMemAllocated;
+    this.getBbsMemAllocated = getBbsMemAllocated;
+    this.getCcUploaderMemAllocated = getCcUploaderMemAllocated;
+    this.getFileServerMemAllocated = getFileServerMemAllocated;
+    this.getGardenLinuxMemAllocated = getGardenLinuxMemAllocated;
+
+    this.getGoRouterLatency = getGoRouterLatency;
+    this.getGoRouterLookupTime = getGoRouterLookupTime;
+    this.getGoRouterMemoryAllocated = getGoRouterMemoryAllocated;
+    this.getGoRoutingApiMemoryAllocated = getGoRoutingApiMemoryAllocated;
+   
     this.makeApplicationIdFilter = makeApplicationIdFilter;
     this._parseValues = _parseValues;
     this._isErrorResponse = _isErrorResponse;
 
+
+    function fetchAppMetricsData(appId, cnsiGuid, apiMetricsFunc) {
+      return apiMetricsFunc(makeApplicationIdFilter(appId), modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (res) {
+          if (_isErrorResponse(res)) {
+            return $q.reject(res.data);
+          }
+          res.data.data.result = _parseValues(res);
+          return res.data.data.result;
+        });
+    }
+
+    function fetchCFMetricsData(cnsiGuid, apiMetricsFunc) {
+      return apiMetricsFunc(null,  modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (res) {
+          if (_isErrorResponse(res)) {
+            return $q.reject(res.data);
+          }
+          res.data.data.result = _parseValues(res);
+          return res.data.data.result;
+        });
+    }
+
+
     function _parseValues(res) {
-      var valuesArray = res.data.data.result[0].values;
-      var parsedValuesArray = _.transform(valuesArray, function (result, value) {
-        var dataPoint = value;
-        dataPoint[1] = parseFloat(dataPoint[1]);
-        result.push(dataPoint);
-        return true;
+
+      var resultArray = [];
+      _.each(res.data.data.result, function(result){
+        var valuesArray = result.values;
+        result.values = _.transform(valuesArray, function (result, value) {
+          var dataPoint = value;
+          dataPoint[1] = parseFloat(dataPoint[1]);
+          result.push(dataPoint);
+          return true;
+        });
+        resultArray.push(result)
       });
-      return parsedValuesArray;
+      return resultArray;
     }
 
-    function getAppCpuUsage(appId) {
-      return apiManager.retrieve('cf-metrics.metrics')
-        .getAppCpuUsage(makeApplicationIdFilter(appId))
-        .then(function (res) {
-          if (_isErrorResponse(res)) {
-            return $q.reject(res.data);
-          }
-          res.data.data.result[0].values = _parseValues(res);
-          return res.data.data.result[0];
-        });
+    function getAppCpuUsage(appId, cnsiGuid) {
+      return fetchAppMetricsData(appId, cnsiGuid,
+      apiManager.retrieve('cf-metrics.metrics')
+        .getAppCpuUsage);
     }
 
-    function getAppMemoryUsage(appId) {
-      return apiManager.retrieve('cf-metrics.metrics')
-        .getAppMemoryUsage(makeApplicationIdFilter(appId))
-        .then(function (res) {
-          if (_isErrorResponse(res)) {
-            return $q.reject(res.data);
-          }
-          res.data.data.result[0].values = _parseValues(res);
-          return res.data.data.result[0];
-        });
+    function getAppMemoryUsage(appId, cnsiGuid) {
+      return fetchAppMetricsData(appId, cnsiGuid,
+      apiManager.retrieve('cf-metrics.metrics')
+        .getAppMemoryUsage);
     }
 
-    function getAppDiskUsage(appId) {
-      return apiManager.retrieve('cf-metrics.metrics')
-        .getAppDiskUsage(makeApplicationIdFilter(appId))
-        .then(function (res) {
-          if (_isErrorResponse(res)) {
-            return $q.reject(res.data);
-          }
-          res.data.data.result[0].values = _parseValues(res);
-          return res.data.data.result[0];
-        });
+    function getAppDiskUsage(appId, cnsiGuid) {
+      return fetchAppMetricsData(appId, cnsiGuid,
+      apiManager.retrieve('cf-metrics.metrics')
+        .getAppDiskUsage);
+    }
+
+    function getCCTasksRunningMemory(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getCCTasksRunningMemory);
+    }
+
+    function getCCTasksRunningCount(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getCCTasksRunningCount);
+    }
+
+    function getCCCpuLoad(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getCCCpuLoad);
+    }
+
+    function getCCMemoryLoad(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getCCMemoryLoad);
+    }
+
+    function getAuctioneerMemAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getAuctioneerMemAllocated);
+    }
+
+    function getBbsMemAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getBbsMemAllocated);
+    }
+
+    function getCcUploaderMemAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getCcUploaderMemAllocated);
+    }
+
+    function getFileServerMemAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getFileServerMemAllocated);
+    }
+
+    function getGardenLinuxMemAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getGardenLinuxMemAllocated);
+    }
+
+    function getGoRouterLatency(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getGoRouterLatency);
+    }
+
+    function getGoRouterLookupTime(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getGoRouterLookupTime);
+    }
+
+    function getGoRouterMemoryAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getGoRouterMemoryAllocated);
+    }
+
+    function getGoRoutingApiMemoryAllocated(cnsiGuid) {
+      return fetchCFMetricsData(cnsiGuid, apiManager.retrieve('cf-metrics.metrics').getGoRoutingApiMemoryAllocated);
     }
 
     function _isErrorResponse(res) {

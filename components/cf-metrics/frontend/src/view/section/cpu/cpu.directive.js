@@ -22,6 +22,7 @@
     var that = this;
     this.metricsModel = modelManager.retrieve('cf-metrics.metrics');
     this.metricFunction = that.metricsModel.getAppCpuUsage;
+    this.enableLegend = true;
     this.yTickFormatter = function (d) {
       return d * 100;
     }

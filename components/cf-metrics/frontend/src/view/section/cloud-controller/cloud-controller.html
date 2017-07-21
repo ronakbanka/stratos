@@ -1,0 +1,31 @@
+<div class="cloud-controller">
+  <div class="cloud-controller-card">
+    <card-base
+      y-label="Memory Load"
+      chart-id="memory_load"
+      chart-title="Memory Load"
+      y-tick-formatter="cloudControllerCtrl.getCCMemoryLoadYTickFormatter"
+      metric-function="cloudControllerCtrl.getCCMemoryLoadFunc"
+    ></card-base>
+    <card-base
+      y-label="Total Memory Consumption by Tasks"
+      chart-id="tasks_running_memory"
+      chart-title="Total Memory Consumption by Tasks"
+      y-tick-formatter="cloudControllerCtrl.getCCTasksRunningMemoryYTickFormatter"
+      metric-function="cloudControllerCtrl.getCCTasksRunningMemoryFunc"
+    ></card-base>
+    <card-base
+      y-label="Tasks Running"
+      chart-id="tasks_running"
+      chart-title="Tasks Running"
+      y-tick-formatter="cloudControllerCtrl.getCCTasksRunningCountFuncYTickFormatter"
+      metric-function="cloudControllerCtrl.getCCTasksRunningCountFunc"
+    ></card-base>
+    <card-base
+      y-label="CPU Load"
+      chart-id="cpu_load"
+      chart-title="CPU Load"
+      y-tick-formatter="cloudControllerCtrl.getCCCpuLoadYTickFormatter"
+      metric-function="cloudControllerCtrl.getCCCpuLoadFunc"
+    ></card-base>
+</div>

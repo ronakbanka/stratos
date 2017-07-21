@@ -12,6 +12,7 @@
         yLabel: '@',
         chartId: '@',
         chartTitle: '@',
+        enableLegend: '=',
         yTickFormatter: '&',
         metricFunction: '&'
       },
@@ -22,10 +23,9 @@
     };
   }
 
-  function cardBaseController($q, $interval, modelManager, $state) {
+  function cardBaseController($q, $interval, modelManager, $stateParams) {
 
     var that = this;
-    this.$state = $state;
     this.$q = $q;
     this.metricsModel = modelManager.retrieve('cf-metrics.metrics');
 
@@ -33,14 +33,24 @@
       title: this.chartTitle
     };
 
+    var cnsiGuid = $stateParams.cnsiGuid || $stateParams.guid
     this.metricsData = null;
-    $interval(function () {
-      that.metricFunction()(that.appId)
+
+    var intervalFunc = function () {
+      var promise = null;
+      if (that.appId){
+        promise = that.metricFunction()(that.appId, cnsiGuid)
+      } else {
+        promise = that.metricFunction()(cnsiGuid)
+      }
+      promise
         .then(function (data) {
-          console.log(data);
           that.metricsData = data
         })
-    }, 5000);
+    }
+
+    intervalFunc()
+    $interval(intervalFunc, 5000);
 
     this.getCardData = function () {
       return that.cardData;

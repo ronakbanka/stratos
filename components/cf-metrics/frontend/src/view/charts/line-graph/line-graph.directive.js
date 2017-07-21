@@ -12,7 +12,8 @@
         yTickFormatter: '&',
         metricsData: '=',
         chartId: '@',
-        chartTitle: '@'
+        chartTitle: '@',
+        enableLegend: '='
       },
       controller: LineGraphController,
       controllerAs: 'lineGraphCtrl',
@@ -25,6 +26,8 @@
 
     var that = this;
     this.appUtilsService = appUtilsService;
+
+    this.seriesColor = ['#60799d', '#ad304b', '#2ab21e', '#efd402'];
 
     $scope.$watchCollection(function () {
       return [that.metricsData, that.chartApi];
@@ -54,10 +57,10 @@
         },
         useInteractiveGuideline: true,
         dispatch: {},
-        x: function(d){
+        x: function (d) {
           return d[0]
         },
-        y: function(d){
+        y: function (d) {
           return d[1].toFixed(4)
         },
         xAxis: {
@@ -69,7 +72,6 @@
         },
         yAxis: {
           axisLabel: this.yLabel,
-          axisLabelDistance: -20,
           showMaxMin: false,
           orient: 'right',
           tickFormat: function (d) {
@@ -88,7 +90,7 @@
             }
           }
         },
-        showLegend: false,
+        showLegend: this.enableLegend ? this.enableLegend : false,
         interpolate: 'basis'
       }
     };
@@ -122,30 +124,54 @@
 
       var that = this;
 
-      function calculateAverage(dataPoints) {
+      function calculateAverage(dataSeries) {
 
-        var average = _.mean(_.map(dataPoints, '1'));
-        var maxValue = _.max(_.map(dataPoints, '1'));
-        var minValue = _.min(_.map(dataPoints, '1'));
+        var cumulativeDataPoints = [];
+         _.each(dataSeries, function(dataSet){
+          cumulativeDataPoints = dataSet.values.map(function(num, idx){
+            var key = "" + num[0]
+            if (cumulativeDataPoints[key]){
+              cumulativeDataPoints[key][1].push(num[1]);
+            } else {
+              return [key, [num[1]]];
+            }
+          });
+        });
+
+        // Average across the array
+        cumulativeDataPoints = cumulativeDataPoints.map(function(values, idx){
+          return _.mean(values);
+        });
+
+        var average = _.mean(_.map(cumulativeDataPoints, '1'));
+        var maxValue = _.max(_.map(cumulativeDataPoints));
+        var minValue = _.min(_.map(cumulativeDataPoints));
 
         that.options.chart.yDomain = [minValue * 0.75, maxValue * 1.25];
 
-        return _.map(dataPoints, function (dataPoint) {
+        return _.map(cumulativeDataPoints, function (dataPoint) {
           return [dataPoint[0], average]
         });
       }
 
-      this.data = [
-        {
-          color: '#60799d',
-          values: this.metricsData.values,
-          key: this.chartTitle
-        },
-        {
-          color: '#60799d',
-          values: calculateAverage(this.metricsData.values),
-          key: 'Average'
-        }];
+      this.data = [];
+      _.each(this.metricsData, function (dataSeries, index) {
+
+        var instanceIndex = dataSeries.metric && dataSeries.metric.instance_index;
+        that.data.push({
+          color: that.seriesColor[instanceIndex ? parseInt(instanceIndex) : index],
+          values: dataSeries.values,
+          key: instanceIndex ? 'Instance #' + dataSeries.metric.instance_index : that.chartTitle
+        });
+
+      });
+      // TODO average
+      // this.data.push({
+      //   color: '#60799d',
+      //   values: calculateAverage(this.metricsData),
+      //   key: 'Average'
+      // });
+
     }
 
 

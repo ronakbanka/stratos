@@ -1,7 +1,10 @@
 {
   "cf": {
     "metrics": {
-      "label": "Metrics"
+      "label": "Metrics",
+      "cc-label": "Cloud Controller",
+      "diego-label": "Diego",
+      "routing-label": "Routing"
       },
       "labels": {
       }

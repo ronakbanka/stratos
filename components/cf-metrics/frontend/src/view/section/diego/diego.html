@@ -1,0 +1,43 @@
+<div class="cloud-controller">
+  <div class="cloud-controller-card">
+    <card-base
+      y-label="Memory Consumption by Auctioneer"
+      chart-id="auctioneer_running_memory"
+      chart-title="Memory Consumption by Auctioneer"
+      y-tick-formatter="diegoMetricsCtrl.getAuctioneerMemAllocatedYTickFormatter"
+      metric-function="diegoMetricsCtrl.getAuctioneerMemAllocatedFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Memory Consumption by BBS"
+      chart-id="bbs_running_memory"
+      chart-title="Memory Consumption by BBS"
+      y-tick-formatter="diegoMetricsCtrl.getBbsMemAllocatedYTickFormatter"
+      metric-function="diegoMetricsCtrl.getBbsMemAllocatedFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Memory Consumption by CC Uploader"
+      chart-id="cc_uploader_running_memory"
+      chart-title="Memory Consumption by CC Uploader"
+      y-tick-formatter="diegoMetricsCtrl.getCcUploaderMemAllocatedYTickFormatter"
+      metric-function="diegoMetricsCtrl.getCcUploaderMemAllocatedFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Memory Consumption by File Server"
+      chart-id="fs_running_memory"
+      chart-title="Memory Consumption by File Server"
+      y-tick-formatter="diegoMetricsCtrl.getFileServerMemAllocatedYTickFormatter"
+      metric-function="diegoMetricsCtrl.getFileServerMemAllocatedFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Memory Consumption by Garden Linux"
+      chart-id="gl_running_memory"
+      chart-title="Memory Consumption by Garden Linux"
+      y-tick-formatter="diegoMetricsCtrl.getGardenLinuxMemAllocatedYTickFormatter"
+      metric-function="diegoMetricsCtrl.getGardenLinuxMemAllocatedFunc"
+    ></card-base>
+   
+</div>

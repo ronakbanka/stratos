@@ -1,0 +1,35 @@
+<div class="cloud-controller">
+  <div class="cloud-controller-card">
+    <card-base
+      y-label="Go Router Latency (ms)"
+      chart-id="gor_lat_running_memory"
+      chart-title="Go Router Latency (ms)"
+      y-tick-formatter="routingMetricsCtrl.getGoRouterLatencyYTickFormatter"
+      metric-function="routingMetricsCtrl.getGoRouterLatencyFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Go Router Lookup Time (ns)"
+      chart-id="gor_lookup_time_running_memory"
+      chart-title="Go Router Lookup Time (ns)"
+      y-tick-formatter="routingMetricsCtrl.getGoRouterLookupTimeYTickFormatter"
+      metric-function="routingMetricsCtrl.getGoRouterLookupTimeFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Go Router Memory Usage"
+      chart-id="gorouter_mem_running_memory"
+      chart-title="Go Router Memory Usage"
+      y-tick-formatter="routingMetricsCtrl.getGoRouterMemoryAllocatedYTickFormatter"
+      metric-function="routingMetricsCtrl.getGoRouterMemoryAllocatedFunc"
+    ></card-base>
+
+    <card-base
+      y-label="Routing API Memory Usage"
+      chart-id="gorouting_running_memory"
+      chart-title="Routing API Memory Usage"
+      y-tick-formatter="routingMetricsCtrl.getGoRoutingApiMemoryAllocatedYTickFormatter"
+      metric-function="routingMetricsCtrl.getGoRoutingApiMemoryAllocatedFunc"
+    ></card-base>
+
+</div>

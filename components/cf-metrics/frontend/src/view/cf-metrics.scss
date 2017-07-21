@@ -1,1 +1,10 @@
 @import "charts/line-graph/line-graph";
+
+.metric-tab{
+   .nav-tabs>li.active>a{
+       background-color: transparent
+   } 
+   .nav-tabs>li>a:hover{
+       background-color: transparent
+   } 
+}
