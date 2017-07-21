@@ -29,6 +29,7 @@ type CNSIRecord struct {
 	TokenEndpoint          string   `json:"token_endpoint"`
 	DopplerLoggingEndpoint string   `json:"doppler_logging_endpoint"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
+	MetricsEndpoint        string   `json:"metrics_endpoint"`
 }
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?

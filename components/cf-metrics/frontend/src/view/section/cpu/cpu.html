@@ -1,0 +1,10 @@
+<div class="cpu-card">
+  <card-base
+    app-id="{{ cpuSectionCtrl.appId }}"
+    y-label="CPU Utilization (%)"
+    chart-id="cpu_charts"
+    chart-title="CPU Utilization"
+    y-tick-formatter="cpuSectionCtrl.yTickFormatter"
+    metric-function="cpuSectionCtrl.metricFunction"
+  ></card-base>
+</div>

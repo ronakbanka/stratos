@@ -1,8 +1,8 @@
 package cnsis
 
 import (
-	"net/url"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"net/url"
 )
 
 // RegisteredCluster - <TBD>
@@ -14,6 +14,7 @@ type RegisteredCluster struct {
 	Account           string   `json:"account"`
 	TokenExpiry       int64    `json:"token_expiry"`
 	SkipSSLValidation bool     `json:"skip_ssl_validation"`
+	MetricsEndpoint   string   `json:"metrics_endpoint"`
 }
 
 // Repository is an application of the repository pattern for storing CNSI Records
@@ -26,6 +27,6 @@ type Repository interface {
 	Save(guid string, cnsiRecord interfaces.CNSIRecord) error
 }
 
-type Endpoint interface{
-	Init() ()
+type Endpoint interface {
+	Init()
 }

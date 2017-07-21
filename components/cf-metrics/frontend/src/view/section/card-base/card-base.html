@@ -1,0 +1,18 @@
+<div class="base-card">
+  <gallery-card class="gallery-card"
+                card-data="cardBaseCtrl.getCardData()">
+
+    <div class="">
+      <div class="content">
+        <line-graph
+          class="line-graph"
+          y-label="{{ cardBaseCtrl.yLabel }}"
+          y-tick-formatter="cardBaseCtrl.yTickFormatter"
+          metrics-data="cardBaseCtrl.metricsData"
+          chart-id="{{ cardBaseCtrl.chartId }}" ,
+          chart-title="{{ cardBaseCtrl.chartTitle }}"
+        ></line-graph>
+      </div>
+    </div>
+  </gallery-card>
+</div>

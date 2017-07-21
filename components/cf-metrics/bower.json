@@ -1,0 +1,19 @@
+{
+  "name": "cf-metrics",
+  "description": "",
+  "license": "Apache-2.0",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "frontend/src/view/cf-metrics.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "cloud-foundry": "./components/cloud-foundry",
+    "d3": "^3.4.4",
+    "nvd3": "1.8.4",
+    "angular-nvd3": "^1.0.9"
+  }
+}
