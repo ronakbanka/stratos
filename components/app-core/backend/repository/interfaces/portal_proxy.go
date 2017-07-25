@@ -28,6 +28,8 @@ type PortalProxy interface {
 	DoLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes, error)
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
+	SetCNSIRecord(guid string, c CNSIRecord) error
+	UpdateCNSIRecord(guid string, c CNSIRecord) error
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig

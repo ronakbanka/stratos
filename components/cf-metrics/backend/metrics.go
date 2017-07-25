@@ -8,13 +8,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/url"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
 	"github.com/labstack/echo/engine/standard"
-	"io"
-	"io/ioutil"
-	"net/url"
 )
 
 type CNSIRequest struct {
@@ -33,12 +34,14 @@ type CNSIRequest struct {
 	Error    error
 }
 
-func (cfMetics *CFMetrics) proxy(c echo.Context) error {
+func (cfMetrics *CFMetrics) proxy(c echo.Context) error {
 	log.Info("metricsProxy")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
 
 	uri := makeRequestURI(c)
+	log.Infof("Will send this uri request %+v", uri)
+
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
 
@@ -55,13 +58,13 @@ func (cfMetics *CFMetrics) proxy(c echo.Context) error {
 	// send the request to each CNSI
 	done := make(chan *CNSIRequest)
 	for _, cnsi := range cnsiList {
-		cnsiRequest, buildErr := cfMetics.buildMetricsRequest(cnsi, portalUserGUID, req.Method(), uri, body, header)
+		cnsiRequest, buildErr := cfMetrics.buildMetricsRequest(cnsi, portalUserGUID, req.Method(), uri, body, header)
 		if buildErr != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 		}
 
 		log.Infof("Will send this request %+v", cnsiRequest)
-		go cfMetics.doRequest(&cnsiRequest, done)
+		go cfMetrics.doRequest(&cnsiRequest, done)
 	}
 
 	responses := make(map[string]*CNSIRequest)
@@ -142,8 +145,8 @@ func getPortalUserGUID(c echo.Context) (string, error) {
 	return portalUserGUIDIntf.(string), nil
 }
 
-func (cfMetics *CFMetrics) buildMetricsRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (CNSIRequest, error) {
-	log.Debug("buildCNSIRequest")
+func (cfMetrics *CFMetrics) buildMetricsRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (CNSIRequest, error) {
+	log.Info("buildCNSIRequest")
 	cnsiRequest := CNSIRequest{
 		GUID:     cnsiGUID,
 		UserGUID: userGUID,
@@ -152,8 +155,8 @@ func (cfMetics *CFMetrics) buildMetricsRequest(cnsiGUID string, userGUID string,
 		Body:   body,
 		Header: header,
 	}
-
-	cnsiRec, err := cfMetics.portalProxy.GetCNSIRecord(cnsiGUID)
+	log.Infof("Will look for cnsiGuid %s", cnsiGUID)
+	cnsiRec, err := cfMetrics.portalProxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {
 		return cnsiRequest, err
 	}
@@ -170,7 +173,7 @@ func (cfMetics *CFMetrics) buildMetricsRequest(cnsiGUID string, userGUID string,
 	return cnsiRequest, nil
 }
 
-func (cfMetics *CFMetrics) doRequest(cnsiRequest *CNSIRequest, done chan<- *CNSIRequest) {
+func (cfMetrics *CFMetrics) doRequest(cnsiRequest *CNSIRequest, done chan<- *CNSIRequest) {
 	log.Info("Sending metrics Request")
 
 	var body io.Reader
@@ -190,7 +193,7 @@ func (cfMetics *CFMetrics) doRequest(cnsiRequest *CNSIRequest, done chan<- *CNSI
 		return
 	}
 
-	client := cfMetics.portalProxy.GetHttpClient(cnsiRequest.SkipSSLValidation)
+	client := cfMetrics.portalProxy.GetHttpClient(cnsiRequest.SkipSSLValidation)
 	res, err = client.Do(req)
 
 	if err != nil {
@@ -235,6 +238,31 @@ func buildJSONResponse(cnsiList []string, responses map[string]*CNSIRequest) map
 	}
 
 	return jsonResponse
+}
+
+func (cfMetrics *CFMetrics) addMetricsEndpoint(c echo.Context) error {
+	log.Info("addMetricsEndpoint")
+	metricsEndpoint := c.FormValue("metrics_endpoint")
+	cnsiGuid := c.FormValue("cnsi_guid")
+
+	log.Infof("Received request for: %s, %s", metricsEndpoint, cnsiGuid)
+
+	cnsiRec, err := cfMetrics.portalProxy.GetCNSIRecord(cnsiGuid)
+	if err != nil {
+		log.Infof("Failed %s, %s", err)
+		echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Unable to find CNSI %s", cnsiGuid))
+		return err
+	}
+	cnsiRec.MetricsEndpoint = metricsEndpoint
+	err = cfMetrics.portalProxy.UpdateCNSIRecord(cnsiGuid, cnsiRec)
+	if err != nil {
+		log.Infof("Failed %s, %s", err)
+		echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Failed to update CNSI Record"))
+		return err
+	}
+
+	c.NoContent(http.StatusOK)
+	return nil
 }
 
 func getEchoURL(c echo.Context) url.URL {

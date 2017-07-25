@@ -38,6 +38,8 @@
     this.getGoRouterLookupTime = getGoRouterLookupTime;
     this.getGoRouterMemoryAllocated = getGoRouterMemoryAllocated;
     this.getGoRoutingApiMemoryAllocated = getGoRoutingApiMemoryAllocated;
+
+    this.addMetricsEndpoint = addMetricsEndpoint;
    
     this.makeApplicationIdFilter = makeApplicationIdFilter;
     this._parseValues = _parseValues;
@@ -157,6 +159,9 @@
       return !(res && res.data && res.data.status === 'success')
     }
 
+    function addMetricsEndpoint(metricsEndpoint, cnsiGuid) {
+       return apiManager.retrieve('cf-metrics.metrics').addMetricsEndpoint(metricsEndpoint, cnsiGuid);
+    }
 
     function makeApplicationIdFilter(appId) {
       return '{application_id="' + appId + '"}';

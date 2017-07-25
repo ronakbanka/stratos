@@ -1,10 +1,38 @@
 @import "charts/line-graph/line-graph";
 
-.metric-tab{
-   .nav-tabs>li.active>a{
-       background-color: transparent
-   } 
-   .nav-tabs>li>a:hover{
-       background-color: transparent
-   } 
+.cluster-metrics {
+
+    .metric-tab{
+    .nav-tabs>li.active>a{
+        background-color: transparent
+    } 
+    .nav-tabs>li>a:hover{
+        background-color: transparent
+    } 
+
+    }
+
+  .setup-cluster-metrics {
+    
+    clear: both;
+    text-align: center;
+    padding: $console-unit-space*2 0;
+    width: 80%;
+    margin: auto;
+    
+    .inner-div {
+       width: 50%;
+       margin: 0 auto; 
+        .msg {
+            font-weight: $console-font-weight-semibold;
+            color: $dove-gray;
+            font-size: 200%;
+            .btn-link {
+            font-weight: $console-font-weight-semibold;
+            }
+    }
+    }
+
+  }
+
 }

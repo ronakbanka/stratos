@@ -38,6 +38,8 @@
     this.getGoRouterLookupTime = _metricsQuery('firehose_value_metric_gorouter_route_lookup_time');
     this.getGoRouterMemoryAllocated = _metricsQuery('firehose_value_metric_gorouter_memory_stats_num_bytes_allocated');
     this.getGoRoutingApiMemoryAllocated = _metricsQuery('firehose_value_metric_routing_api_memory_stats_num_bytes_allocated');
+
+    this.addMetricsEndpoint = addMetricsEndpoint;
  
     function _metricsQuery(metrics) {
       return function (filter, httpConfigOptions, time) {
@@ -50,12 +52,24 @@
        if (!time) {
           time = '[60m]';
         }
-        config.url = metricsUrl + 'api/v1/query?query=' + metrics + (filter ? filter : '') + time;
+        config.url = metricsUrl + 'proxy/api/v1/query?query=' + metrics + (filter ? filter : '') + time;
         config.method = 'GET';
         return $http(config);
       };
     }
 
+    function addMetricsEndpoint(metricsEndpoint, cnsiGuid) {
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = $httpParamSerializer({
+        metrics_endpoint: metricsEndpoint,
+        cnsi_guid: cnsiGuid
+      });
+      return $http.post('/pp/v1/metrics/add', data, config);
+    }
   }
 
 })();

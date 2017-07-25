@@ -30,6 +30,18 @@ var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_en
 var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, metrics_endpoint)
 						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
+var updateCNSI = `UPDATE cnsis 
+					SET name = $1, 
+						cnsi_type = $2, 
+						api_endpoint = $3, 
+						auth_endpoint = $4, 
+						token_endpoint = $5, 
+						doppler_logging_endpoint = $6, 
+						skip_ssl_validation = $7, 
+						metrics_endpoint = $8 
+					WHERE guid = $9
+	`
+
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
 // TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
@@ -53,6 +65,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	findCNSIByAPIEndpoint = datastore.ModifySQLStatement(findCNSIByAPIEndpoint, databaseProvider)
 	saveCNSI = datastore.ModifySQLStatement(saveCNSI, databaseProvider)
 	deleteCNSI = datastore.ModifySQLStatement(deleteCNSI, databaseProvider)
+	updateCNSI = datastore.ModifySQLStatement(updateCNSI, databaseProvider)
 }
 
 // List - Returns a list of CNSI Records
@@ -211,6 +224,17 @@ func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) e
 	log.Println("Save")
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
 		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation, cnsi.MetricsEndpoint); err != nil {
+		return fmt.Errorf("Unable to Save CNSI record: %v", err)
+	}
+
+	return nil
+}
+
+// Update - Persist a CNSI Record to a datastore
+func (p *PostgresCNSIRepository) Update(guid string, cnsi interfaces.CNSIRecord) error {
+	log.Println("Update")
+	if _, err := p.db.Exec(updateCNSI, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation, cnsi.MetricsEndpoint, guid); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
 

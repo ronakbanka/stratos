@@ -81,8 +81,14 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appUtilsService} appUtilsService - utils service
    */
-  function ClusterMetricsController($location, $stateParams, $state, $scope, modelManager, appUtilsService) {
+  function ClusterMetricsController($location, $stateParams, $state, $scope, modelManager, frameworkAsyncTaskDialog) {
     var vm = this;
+    var cnsiGuid = $stateParams.guid;
+    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    var metricsModel = modelManager.retrieve('cf-metrics.metrics');
+
+    vm.IsMetricsEndpointSet = IsMetricsEndpointSet;
+    vm.addMetricsEndpoint = addMetricsEndpoint;
     vm.tabs = [
       {
         position: 1,
@@ -103,6 +109,33 @@
         label: 'cf.metrics.routing-label'
       }
     ];
+    
+    function IsMetricsEndpointSet() {
+      var cnsiDetails = _.find(serviceInstanceModel.serviceInstances, {guid: cnsiGuid});
+      return cnsiDetails && cnsiDetails.metrics_endpoint !== '';
+    }   
+    
+    function addMetricsEndpoint() {
+      frameworkAsyncTaskDialog(
+        {
+          title: 'Specify Metrics Endpoint',
+          templateUrl: 'cf-metrics/view/set-metrics-endpoint.html',
+          submitCommit: true,
+          buttonTitles: {
+            submit: 'Set'
+          },
+          class: 'dialog-form',
+          dialog: true
+        },
+        {
+          data: {}
+        },
+        function (metricsEndpoint) {
+          return metricsModel.addMetricsEndpoint(metricsEndpoint.url, cnsiGuid)
+            .then(function() {
+              return serviceInstanceModel.list();
+            });
+        });
+    }
   }
-
 })();

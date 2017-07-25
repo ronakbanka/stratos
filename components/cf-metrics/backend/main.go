@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
@@ -38,7 +39,8 @@ func (cfMetrics *CFMetrics) AddSessionGroupRoutes(sessionGroup *echo.Group) {
 	// Setup /metrics passthrough group
 	log.Infof("Adding /metrics path")
 	metricsGroup := sessionGroup.Group("/metrics")
-	metricsGroup.Any("/*", cfMetrics.proxy)
+	metricsGroup.POST("/add", cfMetrics.addMetricsEndpoint)
+	metricsGroup.Any("/proxy/*", cfMetrics.proxy)
 }
 
 func (cfMetrics *CFMetrics) Init() error {

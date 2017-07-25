@@ -1,4 +1,13 @@
 <div class="cluster-metrics">
+   <div class="setup-cluster-metrics" ng-if="!clusterMetricsCtrl.IsMetricsEndpointSet()">
+    <div class="inner-div">
+      <div class="msg" translate>Metrics Endpoint is not configured.</div>
+      <button ng-click="clusterMetricsCtrl.addMetricsEndpoint()" class="btn btn-primary" translate>Add Metrics Endpoint</button>
+    </div>       
+   </div>
+
+   <div class="metric-tabs" ng-if="clusterMetricsCtrl.IsMetricsEndpointSet()">
     <cf-tabs class="metric-tab" tabs="clusterMetricsCtrl.tabs"></cf-tabs>
-   <div ui-view></div>
+    <div ui-view></div>
+   </div>
 </div>

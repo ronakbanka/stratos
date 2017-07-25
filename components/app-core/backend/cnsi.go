@@ -104,7 +104,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.APIEndpoint = apiEndpointURL
 	newCNSI.SkipSSLValidation = skipSSLValidation
 
-	err = p.setCNSIRecord(guid, newCNSI)
+	err = p.SetCNSIRecord(guid, newCNSI)
 
 	// set the guid on the object so it's returned in the response
 	newCNSI.GUID = guid
@@ -270,8 +270,8 @@ func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
 	return true
 }
 
-func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error {
-	log.Debug("setCNSIRecord")
+func (p *portalProxy) SetCNSIRecord(guid string, c interfaces.CNSIRecord) error {
+	log.Debug("SetCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
@@ -281,6 +281,24 @@ func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error 
 	err = cnsiRepo.Save(guid, c)
 	if err != nil {
 		msg := "Unable to save a CNSI Token: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) UpdateCNSIRecord(guid string, c interfaces.CNSIRecord) error {
+	log.Info("SetCNSIRecord")
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	err = cnsiRepo.Update(guid, c)
+	if err != nil {
+		msg := "Unable to save a CNSI: %v"
 		log.Errorf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
