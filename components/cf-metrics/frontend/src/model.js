@@ -82,6 +82,14 @@
         });
         resultArray.push(result)
       });
+
+      // Sort array if instances are present
+      var index = _.get(resultArray, '0.metric.instance_index');
+      if (index) {
+        resultArray = _.sortBy(resultArray, function(dataSeries) {
+          return parseInt(_.get(dataSeries, 'metric.instance_index'));
+        });
+      }
       return resultArray;
     }
 

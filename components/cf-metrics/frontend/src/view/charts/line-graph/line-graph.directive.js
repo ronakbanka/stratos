@@ -58,10 +58,10 @@
         useInteractiveGuideline: true,
         dispatch: {},
         x: function (d) {
-          return d[0]
+          return d[0];
         },
         y: function (d) {
-          return d[1].toFixed(4)
+          return d[1].toFixed(2);
         },
         xAxis: {
           axisLabel: null,
@@ -128,8 +128,8 @@
 
         var cumulativeDataPoints = [];
          _.each(dataSeries, function(dataSet){
-          cumulativeDataPoints = dataSet.values.map(function(num, idx){
-            var key = "" + num[0]
+          cumulativeDataPoints = dataSet.values.map(function(num, idx) {
+            var key = '' + num[0];
             if (cumulativeDataPoints[key]){
               cumulativeDataPoints[key][1].push(num[1]);
             } else {
@@ -155,17 +155,23 @@
       }
 
 
-      this.data = [];
+      // this.data = [];
       var minValue = Number.MAX_VALUE;
       var maxValue = Number.MIN_VALUE;
       _.each(this.metricsData, function (dataSeries, index) {
 
-        var instanceIndex = dataSeries.metric && dataSeries.metric.instance_index;
-        that.data.push({
-          color: that.seriesColor[instanceIndex ? parseInt(instanceIndex) : index],
-          values: dataSeries.values,
-          key: instanceIndex ? 'Instance #' + dataSeries.metric.instance_index : that.chartTitle
-        });
+        var instanceIndex = dataSeries.metric && dataSeries.metric.instance_index || '0';
+        var dataObj = {
+            color: that.seriesColor[instanceIndex ? parseInt(instanceIndex) : index],
+            values: dataSeries.values,
+            key: instanceIndex ? 'Instance #' + instanceIndex : that.chartTitle
+        };
+
+        if (_.has(that.data, parseInt(instanceIndex))) {
+          that.data[ parseInt(instanceIndex)].values = dataObj.values 
+        } else {
+          that.data.push(dataObj);
+        }
 
         var seriesMinValue = _.min(_.map(dataSeries.values, '1'));
         var seriesMaxValue = _.max(_.map(dataSeries.values, '1'));
@@ -174,14 +180,7 @@
         maxValue = seriesMaxValue > maxValue ? seriesMaxValue : maxValue;
 
       });
-      this.options.chart.yDomain = [minValue * 0.75, maxValue * 1.25];
-
-      // TODO average
-      // this.data.push({
-      //   color: '#60799d',
-      //   values: calculateAverage(this.metricsData),
-      //   key: 'Average'
-      // });
+      this.options.chart.yDomain = [minValue * 0.50, maxValue * 1.5];
 
     }
   });
