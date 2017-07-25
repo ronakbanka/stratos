@@ -19,11 +19,11 @@
       controller: cardBaseController,
       controllerAs: 'cardBaseCtrl',
       scope: {},
-      templateUrl: 'cf-metrics/frontend/src/view/section/card-base/card-base.html'
+      templateUrl: 'cf-metrics/view/section/card-base/card-base.html'
     };
   }
 
-  function cardBaseController($q, $interval, modelManager, $stateParams) {
+  function cardBaseController($q, $interval, $scope, $stateParams, modelManager) {
 
     var that = this;
     this.$q = $q;
@@ -45,12 +45,16 @@
       }
       promise
         .then(function (data) {
-          that.metricsData = data
+          that.metricsData = data;
         })
-    }
+    };
 
-    intervalFunc()
-    $interval(intervalFunc, 5000);
+    intervalFunc();
+    var interval = $interval(intervalFunc, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(interval);
+    });
 
     this.getCardData = function () {
       return that.cardData;

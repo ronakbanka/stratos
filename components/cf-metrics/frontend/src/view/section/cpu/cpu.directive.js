@@ -13,7 +13,7 @@
       controller: cpuSectionController,
       controllerAs: 'cpuSectionCtrl',
       scope: {},
-      templateUrl: 'cf-metrics/frontend/src/view/section/cpu/cpu.html'
+      templateUrl: 'cf-metrics/view/section/cpu/cpu.html'
     };
   }
 

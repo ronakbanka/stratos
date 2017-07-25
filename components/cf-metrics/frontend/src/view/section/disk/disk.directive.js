@@ -13,7 +13,7 @@
       controller: diskSectionController,
       controllerAs: 'diskSectionCtrl',
       scope: {},
-      templateUrl: 'cf-metrics/frontend/src/view/section/disk/disk.html'
+      templateUrl: 'cf-metrics/view/section/disk/disk.html'
     };
   }
 

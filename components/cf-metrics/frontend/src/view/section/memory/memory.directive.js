@@ -13,7 +13,7 @@
       controller: memorySectionController,
       controllerAs: 'memorySectionCtrl',
       scope: {},
-      templateUrl: 'cf-metrics/frontend/src/view/section/memory/memory.html'
+      templateUrl: 'cf-metrics/view/section/memory/memory.html'
     };
   }
 

@@ -18,7 +18,7 @@
       controller: LineGraphController,
       controllerAs: 'lineGraphCtrl',
       scope: {},
-      templateUrl: 'cf-metrics/frontend/src/view/charts/line-graph/line-graph.html'
+      templateUrl: 'cf-metrics/view/charts/line-graph/line-graph.html'
     };
   }
 
@@ -154,7 +154,10 @@
         });
       }
 
+
       this.data = [];
+      var minValue = Number.MAX_VALUE;
+      var maxValue = Number.MIN_VALUE;
       _.each(this.metricsData, function (dataSeries, index) {
 
         var instanceIndex = dataSeries.metric && dataSeries.metric.instance_index;
@@ -164,7 +167,15 @@
           key: instanceIndex ? 'Instance #' + dataSeries.metric.instance_index : that.chartTitle
         });
 
+        var seriesMinValue = _.min(_.map(dataSeries.values, '1'));
+        var seriesMaxValue = _.max(_.map(dataSeries.values, '1'));
+
+        minValue = seriesMinValue < minValue ? seriesMinValue : minValue;
+        maxValue = seriesMaxValue > maxValue ? seriesMaxValue : maxValue;
+
       });
+      this.options.chart.yDomain = [minValue * 0.75, maxValue * 1.25];
+
       // TODO average
       // this.data.push({
       //   color: '#60799d',
@@ -173,8 +184,6 @@
       // });
 
     }
-
-
   });
 
 })();

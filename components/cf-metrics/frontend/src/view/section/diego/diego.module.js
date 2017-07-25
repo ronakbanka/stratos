@@ -8,7 +8,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.metrics.diego', {
       url: '/diego',
-      templateUrl: 'cf-metrics/frontend/src/view/section/diego/diego.html',
+      templateUrl: 'cf-metrics/view/section/diego/diego.html',
       controller: DiegoMetricsController,
       controllerAs: 'diegoMetricsCtrl'
     });

@@ -8,7 +8,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.metrics.cloud-controller', {
       url: '/cc',
-      templateUrl: 'cf-metrics/frontend/src/view/section/cloud-controller/cloud-controller.html',
+      templateUrl: 'cf-metrics/view/section/cloud-controller/cloud-controller.html',
       controller: cloudControllerController,
       controllerAs: 'cloudControllerCtrl'
     });
