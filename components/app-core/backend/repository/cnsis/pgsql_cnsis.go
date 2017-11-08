@@ -19,7 +19,7 @@ var listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, t.use
 										FROM cnsis c, tokens t
 										WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2 AND t.disconnected = '0'`
 
-var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, auth_type
 						FROM cnsis
 						WHERE guid=$1`
 
@@ -27,8 +27,8 @@ var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_en
 						FROM cnsis
 						WHERE api_endpoint=$1`
 
-var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, auth_type)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
@@ -112,9 +112,9 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 
 	for rows.Next() {
 		var (
-			pCNSIType       string
-			pURL            string
-			disconnected	bool
+			pCNSIType    string
+			pURL         string
+			disconnected bool
 		)
 
 		cluster := new(RegisteredCluster)
@@ -152,7 +152,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (interfaces.CNSIRecord, error
 	cnsi := new(interfaces.CNSIRecord)
 
 	err := p.db.QueryRow(findCNSI, guid).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.AuthType)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -211,7 +211,7 @@ func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.
 func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) error {
 	log.Println("Save")
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation); err != nil {
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation, cnsi.AuthType); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
 
