@@ -39,6 +39,14 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	log.Debug("registerEndpoint")
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
+	authType_Str := c.FormValue("auth_type")
+	var authType interfaces.AuthType
+	if authType_Str == "" {
+		authType = interfaces.OAuth2
+	}
+	if authType_Str == "HttpBasic" {
+		authType = interfaces.HttpBasic
+	}
 	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
 	if err != nil {
 		log.Errorf("Failed to parse skip_ssl_validation value: %s", err)
@@ -46,7 +54,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		skipSSLValidation = false
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, fetchInfo, authType)
 	if err != nil {
 		return err
 	}
@@ -55,7 +63,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo interfaces.InfoFunc, authType interfaces.AuthType) (interfaces.CNSIRecord, error) {
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -107,6 +115,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL
 	newCNSI.SkipSSLValidation = skipSSLValidation
+	newCNSI.AuthType = authType
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
@@ -285,7 +294,7 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
 	log.Debug("cnsiRecordExists")
 
-	_, err := p.GetCNSIRecordByEndpoint(endpoint);
+	_, err := p.GetCNSIRecordByEndpoint(endpoint)
 	return err == nil
 }
 

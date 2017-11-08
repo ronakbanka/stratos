@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -201,7 +202,6 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"Need CNSI GUID passed as form param")
 	}
 
-	endpoint := ""
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 
 	if err != nil {
@@ -211,23 +211,23 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	if (cnsiRecord.AuthType = interfaces.OAuth2){
-		return fetchOAuth2Token(cnsiRecord, c)
+	if cnsiRecord.AuthType == interfaces.OAuth2 {
+		return p.fetchOAuth2Token(cnsiRecord, c)
 	}
 
-	if (cnsiRecord.AuthType = intefaces.HttpBasic){
-		return fetchHttpBasicToken(cnsiRecord, c)
+	if cnsiRecord.AuthType == interfaces.HttpBasic {
+		return p.fetchHttpBasicToken(cnsiRecord, c)
 	}
 
-	// TODO: If endpoint is not CF then I expect the plugin provider to provide its own login mechanism
-
+	return nil, nil, nil, interfaces.NewHTTPShadowError(
+		http.StatusBadRequest,
+		"Unknown Auth Type",
+		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, cnsiRecord.AuthType)
 }
 
 func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
 
-	tokenEndpoint := cnsiRecord.APIEndpoint
-
-	uaaRes, u, err := p.loginHttpBasic(c, tokenEndpoint)
+	uaaRes, u, err := p.loginHttpBasic(c)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -239,7 +239,7 @@ func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 }
 
 func (p *portalProxy) fetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
-	endpoint = cnsiRecord.AuthorizationEndpoint
+	endpoint := cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
@@ -357,7 +357,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	return uaaRes, u, nil
 }
 
-func (p *portalProxy) loginHttpBasic(c echo.Context, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")

@@ -21,7 +21,7 @@ type CloudFoundrySpecification struct {
 }
 
 const (
-	EndpointType = "cf"
+	EndpointType  = "cf"
 	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
@@ -70,7 +70,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
 
 	// CF auto reg url missing, continue as normal
-	if (cfAPI == "") {
+	if cfAPI == "" {
 		return nil
 	}
 
@@ -81,7 +81,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, cfEndpointSpec.Info, interfaces.OAuth2)
 		if err != nil {
 			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
 			return nil
@@ -108,7 +108,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	} else {
 		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
 		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
-		return err;
+		return err
 	}
 
 	return nil
@@ -117,7 +117,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, interfaces.CNSIRecord, error) {
 	cfAPI := c.portalProxy.GetConfig().AutoRegisterCFUrl
 
-	if (cfAPI == "") {
+	if cfAPI == "" {
 		return "", interfaces.CNSIRecord{}, nil
 	}
 	// Error is populated if there was an error OR there was no record
