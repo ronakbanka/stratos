@@ -1,5 +1,5 @@
 applications:
-- name: console
+- name: console-rbanka
   memory: 256M
   disk_quota: 256M
   host: console
