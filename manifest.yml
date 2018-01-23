@@ -2,7 +2,7 @@ applications:
 - name: console-rbanka
   memory: 256M
   disk_quota: 256M
-  host: console
+  host: console-rbanka
   timeout: 180
   buildpack: https://github.com/SUSE/stratos-buildpack
   health-check-type: port
